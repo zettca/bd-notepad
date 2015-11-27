@@ -1,0 +1,12 @@
+html, body{
+	margin: 0;
+	padding: 0;
+	font-family: "Open Sans", sans-serif;
+}
+
+header, main, footer{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+	width: 100%;
+}

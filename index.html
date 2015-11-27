@@ -1,13 +1,46 @@
 <!DOCTYPE html>
-<title>BD - Notepad</title>
-<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-<meta content="utf-8" http-equiv="encoding">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
-<link rel="stylesheet" href="res/styles.css">
-<script src="res/jquery-2.1.4.min.js"></script>
-<script src="res/scripts.js"></script>
+<html ng-app="notepadApp">
+<head>
+	<title>BD - Notepad</title>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta content="utf-8" http-equiv="encoding">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+	<link rel="stylesheet" href="res/styles.css">
+	<script src="res/jquery-2.1.4.min.js"></script>
+	<script src="res/angular.min.js"></script>
+	<script src="res/scripts.js"></script>
+</head>
+<body>
+	<main>
+		<h1>It works! Wee</h1>
 
-<main>
-	
-	<h1>It works! wee</h1>
-</main>
+		<section id="login">
+			<h3>Login/Register</h3>
+		</section>
+
+		<section id="pages" ng-controller="pagesCtrl">
+			<h3>Páginas</h3>
+			<ul>
+				<li>Ver</li>
+				<li>Inserir</li>
+				<li>Remover</li>
+				<li ng-repeat="page in pages">{{page}}</li>
+			</ul>
+		</section>
+
+		<section id="types" ng-controller="typesCtrl">
+			<h3>Tipos de Registo</h3>
+			<ul>
+				<li>Inserir</li>
+				<li>Remover</li>
+				<li>Alterar (+) (-)</li>
+				<li ng-repeat="type in types">{{type}}</li>
+			</ul>
+		</section>
+
+		<section id="registos">
+			<h3>Inserir Registos</h3>
+		</section>
+	</main>
+</body>
+</html>
