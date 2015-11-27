@@ -1,14 +1,9 @@
 var notepadApp = angular.module("notepadApp", []);
 
 var BD = {
-	"paginas": ["Técnico", "Férias", "Aniversários", "Poker", "Dívidas"],
-	"tipos":
-	{
-		"Amigo": ["nome", "idade"],
-		"Aniversário": ["nome", "data"],
-		"Morada": ["rua", "porta"],
-		"Empréstimo": ["nome", "valor", "data"]
-	},
+	"accounts": {"Bruno":"123","Poods":"dicks","Metal":"soufixe"},
+	"paginas": ["Técnico", "Férias", "Aniversários", "Poker", "Dívidas", "abc", "def", "chfd"],
+	"tipos": ["Amigo", "Aniversário", "Morada", "Empréstimo"],
 	"registos":
 	[
 		{
@@ -41,5 +36,31 @@ notepadApp.controller("pagesCtrl", function($scope){
 
 
 notepadApp.controller("typesCtrl", function($scope){
-	$scope.types = Object.keys(BD["tipos"]);
+	$scope.types = BD["tipos"];
+});
+
+notepadApp.controller("pagesFormCtrl", function($scope){
+	$scope.pages = BD["paginas"];
+
+	$scope.add = function(page){
+		$scope.pages.push(page);
+		console.log("added " + page);
+	};
+
+	$scope.del = function(page){
+		$scope.pages.splice(page, 1);
+	};
+});
+
+notepadApp.controller("typesFormCtrl", function($scope){
+	$scope.types = BD["tipos"];
+
+	$scope.add = function(type){
+		$scope.types.push(type);
+		console.log("added " + type);
+	};
+
+	$scope.del = function(type){
+		$scope.types.splice(type, 1);
+	};
 });

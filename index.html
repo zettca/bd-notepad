@@ -21,20 +21,32 @@
 		<section id="pages" ng-controller="pagesCtrl">
 			<h3>Páginas</h3>
 			<ul>
-				<li>Ver</li>
-				<li>Inserir</li>
-				<li>Remover</li>
+				<li><b>Ver</b></li>
+				<li><b>Inserir</b></li>
+				<li><b>Remover</b></li>
 				<li ng-repeat="page in pages">{{page}}</li>
+				<li ng-controller="pagesFormCtrl">
+					<form ng-submit="add(page)" onsubmit="reset()">
+						<input required type="text" ng-model="page" placeholder="Nova página" size="6">
+						<input type="submit" value="+">
+					</form>
+				</li>
 			</ul>
 		</section>
 
 		<section id="types" ng-controller="typesCtrl">
 			<h3>Tipos de Registo</h3>
 			<ul>
-				<li>Inserir</li>
-				<li>Remover</li>
-				<li>Alterar (+) (-)</li>
+				<li><b>Inserir</b></li>
+				<li><b>Remover</b></li>
+				<li><b>Alterar (+) (-)</b></li>
 				<li ng-repeat="type in types">{{type}}</li>
+				<li ng-controller="typesFormCtrl">
+					<form ng-submit="add(type)" onsubmit="reset()">
+						<input required type="text" ng-model="type" placeholder="Novo tipo"size="6">
+						<input type="submit" value="+">
+					</form>
+				</li>
 			</ul>
 		</section>
 

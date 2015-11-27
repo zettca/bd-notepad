@@ -4,9 +4,13 @@ html, body{
 	font-family: "Open Sans", sans-serif;
 }
 
-header, main, footer{
+header, footer{
 	display: block;
 	margin: 0px;
 	padding: 0px;
 	width: 100%;
+}
+
+main{
+	padding: 20px;
 }
