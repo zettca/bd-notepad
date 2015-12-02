@@ -13,15 +13,13 @@
 </head>
 <body>
 	<main>
-		<h1>It works! Wee</h1>
-
 		<section id="login" ng-controller="loginCtrl">
 			<h3>Login/Register</h3>
-			<span>{{loggedStatus}}</span>
 			<form ng-submit="login()" onsubmit="reset()">
-				<input required type="text" ng-model="bdusername" name="bdusername" placeholder="Username" size="4">
-				<input required type="text" ng-model="bdpassword" name="bdpassword" placeholder="Password" size="4">
+				<input required type="text" ng-model="bdusername" name="bdusername" placeholder="Username" size="6">
+				<input required type="text" ng-model="bdpassword" name="bdpassword" placeholder="Password" size="6">
 				<input type="submit" value="Login">
+				{{loggedStatus}}
 			</form>
 		</section>
 
@@ -31,7 +29,7 @@
 				<li><b>Ver</b></li>
 				<li><b>Inserir</b></li>
 				<li><b>Remover</b></li>
-				<li ng-repeat="page in pages">{{page}}</li>
+				<li ng-repeat="page in pages">{{page.nome}}</li>
 				<li ng-controller="pagesFormCtrl">
 					<form ng-submit="add()" onsubmit="reset()">
 						<input required type="text" ng-model="bdpage" placeholder="Nova página" size="6">
@@ -47,7 +45,7 @@
 				<li><b>Inserir</b></li>
 				<li><b>Remover</b></li>
 				<li><b>Alterar (+) (-)</b></li>
-				<li ng-repeat="type in types">{{type}}</li>
+				<li ng-repeat="type in types">{{type.nome}}</li>
 				<li ng-controller="typesFormCtrl">
 					<form ng-submit="add()" onsubmit="reset()">
 						<input required type="text" ng-model="bdtype" placeholder="Novo tipo"size="6">
@@ -56,9 +54,13 @@
 				</li>
 			</ul>
 		</section>
-
-		<section id="registos">
-			<h3>Inserir Registos</h3>
+		
+		<section id="records" ng-controller="recordCtrl">
+			<h3>Registos do utilizador</h3>
+			<ul>
+				<li><b>Inserir</b></li>
+				<li ng-repeat="record in records">{{record.nome}}</li>
+			</ul>
 		</section>
 	</main>
 </body>
