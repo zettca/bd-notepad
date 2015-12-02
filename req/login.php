@@ -12,8 +12,11 @@ try{
 
 	$con = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $password);
 	$con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	
+	$user = $_REQUEST['user'];
+	$pass = $_REQUEST['pass'];
 
-	$query = "SELECT * FROM utilizador WHERE (userid<100);";
+	$query = "SELECT * FROM utilizador WHERE email='$user' AND password='$pass'";
 
 	$stmt = $con->prepare($query);
 	$stmt->execute();
