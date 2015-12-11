@@ -13,33 +13,24 @@ try{
 	$con = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $password);
 	$con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	
+	$uid = $_REQUEST['uid'];
 	$pid = $_REQUEST['pid'];
 	
-	if (!$pid) die();
+	if (!($uid && $pid)) die();
 
-	//$query = "DELETE FROM pagina WHERE pageid=$pid";
-	$query = "INSERT INTO pagina
-				SELECT userid,(
-						SELECT max(pagecounter)+1
-						FROM pagina),
-					nome, idseq, ativa, ppagecounter
-				FROM pagina
-				WHERE pagecounter=$pid";
-
+	$query = "INSERT INTO sequencia (contador_sequencia, moment, userid) VALUES ((SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso)+1, NOW(), $uid )";
 	$stmt = $con->prepare($query);
 	$stmt->execute();
 	
-	$squery = "UPDATE pagina
-				SET idseq = (SELECT max(idseq)+1
-							FROM pagina),
-					ppagecounter = (SELECT max(pagecounter)
-									FROM pagina)";
-	
+	$query = "INSERT INTO pagina (userid, pagecounter, nome, idseq, ativa, ppagecounter) VALUES ($uid, (SELECT * FROM (SELECT MAX(pagecounter) FROM pagina) AS coiso)+1, (SELECT * FROM (SELECT nome FROM pagina WHERE pagecounter=$pid) AS coiso), (SELECT * FROM (SELECT idseq FROM pagina WHERE pagecounter=$pid) AS coiso), 0, (SELECT * FROM (SELECT ppagecounter FROM pagina WHERE pagecounter=$pid) AS coiso))";
 	$stmt = $con->prepare($query);
 	$stmt->execute();
 	
+	$query = "UPDATE pagina SET idseq=(SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso), ativa=0, ppagecounter=(SELECT * FROM (SELECT MAX(pagecounter) FROM pagina) AS coiso) WHERE pagecounter=$pid";
+	$stmt = $con->prepare($query);
+	$stmt->execute();
 	
-	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$result = array(success => true, uid => $uid, pid => $pid);
 
 	echo json_encode($result);
 	

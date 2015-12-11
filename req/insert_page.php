@@ -18,13 +18,17 @@ try{
 	
 	if (!($uid && $name)) die();
 
-	$query = "INSERT INTO pagina (userid, nome, ativa) VALUES ($uid, $name, 1)";
-
+	$query = "INSERT INTO sequencia (contador_sequencia, moment, userid) VALUES ((SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso)+1, NOW(), '$uid')";
 	$stmt = $con->prepare($query);
 	$stmt->execute();
-	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	
+    $query = "INSERT INTO pagina (userid, pagecounter, nome, idseq, ativa, ppagecounter) VALUES ('$uid', (SELECT * FROM (SELECT MAX(pagecounter) FROM pagina) AS coiso)+1, '$name', (SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso), 1, NULL )";
+	$stmt = $con->prepare($query);
+	$stmt->execute();
 
-	echo json_encode($result);
+	$result = array(success => true);
+
+	$result = array(success => true, uid => $uid, name => $name);
 	
 	$con = null;
 } catch (Exception $e){

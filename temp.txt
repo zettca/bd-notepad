@@ -1,0 +1,52 @@
+### DELETE PÁGINA
+
+INSERT INTO sequencia (contador_sequencia, moment, userid)
+VALUES
+	(
+		(SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso)+1,
+		NOW(),
+		9999
+	);
+
+/* PID = 1337 */
+
+INSERT INTO pagina (userid, pagecounter, nome, idseq, ativa, ppagecounter)
+VALUES
+	(
+		9999,
+		(SELECT * FROM (SELECT MAX(pagecounter) FROM pagina) AS coiso)+1,
+		(SELECT * FROM (SELECT nome FROM pagina WHERE pagecounter=999903) AS coiso),
+		(SELECT * FROM (SELECT idseq FROM pagina WHERE pagecounter=999903) AS coiso),
+		0,
+		(SELECT * FROM (SELECT ppagecounter FROM pagina WHERE pagecounter=999903) AS coiso)
+	);
+
+UPDATE pagina
+SET
+	idseq=(SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso),
+	ativa=0,
+	ppagecounter=(SELECT * FROM (SELECT MAX(pagecounter) FROM pagina) AS coiso)
+WHERE pagecounter=999903
+
+
+
+### INSERT TIPO_REGISTO
+
+INSERT INTO sequencia (contador_sequencia, moment, userid)
+VALUES
+	(
+		(SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso)+1,
+		NOW(),
+		9999
+	);
+
+INSERT INTO tipo_registo (userid, typecnt, nome, idseq, ativo, ptypecnt)
+VALUES
+	(
+		9999,
+		(SELECT * FROM (SELECT MAX(typecnt) FROM tipo_registo) AS coiso)+1,
+		"Penis",
+		(SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso),
+		1,
+		NULL
+	);

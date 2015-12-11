@@ -4,15 +4,16 @@ html, body{
 	font-family: "Open Sans", sans-serif;
 }
 
-header, footer{
+header, main, footer{
 	display: block;
 	margin: 0px;
 	padding: 0px;
 	width: 100%;
 }
 
-main{
-	padding: 20px;
+section{
+	margin: 60px;
+	display: inline-block;
 }
 
 form, select{

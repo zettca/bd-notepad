@@ -13,15 +13,24 @@ try{
 	$con = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $password);
 	$con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	
-	$pid = $_REQUEST['pid'];
+	$uid = $_REQUEST['uid'];
+	$tid = $_REQUEST['tid'];
 	
-	if (!$pid) die();
+	if (!($uid && $tid)) die();
 
-	//$query = "DELETE FROM pagina WHERE pageid=$pid";
-
+	$query = "INSERT INTO sequencia (contador_sequencia, moment, userid) VALUES ((SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso)+1, NOW(), $uid )";
 	$stmt = $con->prepare($query);
 	$stmt->execute();
-	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	
+	$query = "INSERT INTO tipo_registo (userid, typecnt, nome, idseq, ativo, ptypecnt) VALUES ($uid, (SELECT * FROM (SELECT MAX(typecnt) FROM tipo_registo) AS coiso)+1, (SELECT * FROM (SELECT nome FROM tipo_registo WHERE typecnt=$tid) AS coiso), (SELECT * FROM (SELECT idseq FROM tipo_registo WHERE typecnt=$tid) AS coiso), 0, (SELECT * FROM (SELECT ptypecnt FROM tipo_registo WHERE typecnt=$tid) AS coiso))";
+	$stmt = $con->prepare($query);
+	$stmt->execute();
+	
+	$query = "UPDATE tipo_registo SET idseq=(SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso), ativo=0, ptypecnt=(SELECT * FROM (SELECT MAX(typecnt) FROM tipo_registo) AS coiso) WHERE typecnt=$tid";
+	$stmt = $con->prepare($query);
+	$stmt->execute();
+	
+	$result = array(success => true, uid => $uid, tid => $tid);
 
 	echo json_encode($result);
 	

@@ -35,6 +35,7 @@ notepadApp.service("logServ", ["$rootScope", function($rootScope){
 notepadApp.controller("pagesCtrl", ["$rootScope", "$scope", "$http", "logServ", function($rootScope, $scope, $http, logServ){
 	if (logServ.isUserLogged) loadPages();	// only if session stuff?
 	$rootScope.$on('userLogEvent', loadPages);
+	$rootScope.$on('bdUpdate', loadPages);
 	
 	function loadPages(){
 		var user = logServ.loggedUser;
@@ -54,12 +55,20 @@ notepadApp.controller("pagesCtrl", ["$rootScope", "$scope", "$http", "logServ", 
 		});
 	};
 	
+	$scope.del = function(pageID){
+		console.log("Deleting " + pageID);
+		$http.get("req/select_type_fields.php", {params: {uid: logServ.loggedUser.userid, pid: pageID}}).success(function(data){
+			console.log(data);
+		});
+	};
+	
 }]);
 
 
 notepadApp.controller("typesCtrl", ["$rootScope", "$scope", "$http", "logServ", function($rootScope, $scope, $http, logServ){
 	if (logServ.isUserLogged) loadTypes();	// only if session stuff?
 	$rootScope.$on('userLogEvent', loadTypes);
+	$rootScope.$on('bdUpdate', loadTypes);
 
 	function loadTypes(){
 		var user = logServ.loggedUser;
@@ -72,29 +81,21 @@ notepadApp.controller("typesCtrl", ["$rootScope", "$scope", "$http", "logServ", 
 	
 	$scope.loadFields = function(){
 		var tid = $scope.selectedType;
-		console.log("Updating Fields for pageid=" + tid);
+		console.log("Updating Fields for type=" + tid);
 		$http.get("req/select_type_fields.php", {params: {tid: tid}}).success(function(data){
 			console.log("Found " + data.fields.length + " fields...");
 			$scope.fields = (data.success && data.fields.length > 0) ? data.fields : [];
 		});
 	};
 	
-}]);
-
-/*notepadApp.controller("recordCtrl", ["$rootScope", "$scope", "$http", "logServ", function($rootScope, $scope, $http, logServ){
-	if (logServ.isUserLogged) loadRecords();	// only if session stuff?
-	$rootScope.$on('userLogEvent', function(){ loadRecords(); });
-	
-	function loadRecords(user){
-		user = logServ.loggedUser;
-		console.log("Updating Records for " + user.nome);
-		$http.get("req/hack.php", {params: {query: "SELECT * FROM tipo_registo WHERE userid="+user.userid}}).success(function(data){
-			console.log("Found " + data.length + " Records...");
-			$scope.records = (data.length > 0) ? data : [];
+	$scope.del = function(typeID){
+		console.log("Deleting " + typeID);
+		$http.get("req/select_type_fields.php", {params: {uid: logServ.loggedUser.userid, tid: typeID}}).success(function(data){
+			console.log(data);
 		});
-	}
+	};
 	
-}]);*/
+}]);
 
 
 
@@ -106,13 +107,18 @@ notepadApp.controller("loginCtrl", ["$scope", "$http", "logServ", function($scop
 	$scope.log = logServ;
 	
 	$scope.login = function(){
-		var prams = {};
-		if ($scope.id)
-			prams = {user: $scope.bdusername, pass: $scope.bdpassword, id: $scope.bdid};
-		else
-			prams = {user: $scope.bdusername, pass: $scope.bdpassword, id: $scope.bdid};
-		console.log(prams);
-		$http.get("req/login.php", {params: prams}).success(function(data){
+		var par = {};
+		if ($scope.bdid){
+			par = { id: $scope.bdid };
+		} else if ($scope.bdusername && $scope.bdpassword){
+			par = { user: $scope.bdusername, pass: $scope.bdpassword };
+		} else{
+			par = { id: 9999 };
+		}
+		
+		console.log(par);
+		
+		$http.get("req/login.php", { params: par }).success(function(data){
 			console.log(data);
 			if (data.success){
 				logServ.login(data.user);
@@ -128,50 +134,66 @@ notepadApp.controller("loginCtrl", ["$scope", "$http", "logServ", function($scop
 	
 }]);
 
-notepadApp.controller("pagesFormCtrl", function($scope){
-	$scope.pages = [];
+
+
+
+notepadApp.controller("addPagesFormCtrl", ["$rootScope", "$scope", "$http", "logServ",  function($rootScope, $scope, $http, logServ){
 
 	$scope.add = function(){
-		if ($scope.bdpage){
-			$scope.pages.push($scope.bdpage);
-			console.log($scope.pages);
+		console.log("Adding new Page!");
+		var par = { uid: logServ.loggedUser.userid, name: $scope.bdpage };
+		console.log(par);
+		$http.get("req/insert_page.php", { params: par }).success(function(data){
+			console.log(data);
+			$rootScope.$emit('bdUpdate');
 			$scope.bdpage = "";
-		}
+		});
 	};
 
-	$scope.del = function(){
-		$scope.pages.splice($scope.bdpage, 1);
-	};
-});
+}]);
 
-notepadApp.controller("typesFormCtrl", function($scope){
-	$scope.types = [];
+notepadApp.controller("addRecordsPageFormCtrl", ["$rootScope", "$scope", "$http", "logServ",  function($rootScope, $scope, $http, logServ){
 
 	$scope.add = function(){
-		if ($scope.bdtype){
-			$scope.types.push($scope.bdtype);
-			console.log($scope.types);
-			$scope.bdtype = "";
-		}
-	};
-
-	$scope.del = function(){
-		$scope.types.splice($scope.bdtype, 1);
-	};
-});
-
-notepadApp.controller("recordsFormCtrl", function($scope){
-	$scope.records = [];
-
-	$scope.add = function(){
-		if ($scope.bdrecord){
-			$scope.records.push($scope.bdrecord);
-			console.log($scope.records);
+		console.log("Adding new page Record!");
+		var par = { pid: $scope.selectedPage, name: $scope.bdrecord };
+		$http.get("req/insert_type_fields.php", { params: par }).success(function(data){
+			console.log(data);
+			$rootScope.$emit('bdUpdate');
 			$scope.bdrecord = "";
-		}
+		});
 	};
 
-	$scope.del = function(){
-		$scope.records.splice($scope.bdrecord, 1);
+}]);
+
+
+
+
+notepadApp.controller("addTypesFormCtrl", ["$rootScope", "$scope", "$http", "logServ",  function($rootScope, $scope, $http, logServ){
+
+	$scope.add = function(){
+		console.log("Adding new Type!");
+		var par = { uid: logServ.loggedUser.userid, name: $scope.bdtype };
+		$http.get("req/insert_type.php", { params: par }).success(function(data){
+			console.log(data);
+			$rootScope.$emit('bdUpdate');
+			$scope.bdtype = "";
+		});
 	};
-});
+
+}]);
+
+notepadApp.controller("addFieldsTypeFormCtrl", ["$rootScope", "$scope", "$http", "logServ",  function($rootScope, $scope, $http, logServ){
+
+	$scope.add = function(tid){
+		console.log("Adding new type Field!");
+		var par = { tid: $scope.selectedType, name: $scope.bdfield };
+		$http.get("req/insert_type_fields.php", { params: par }).success(function(data){
+			console.log(data);
+			$rootScope.$emit('bdUpdate');
+			$scope.bdfield = "";
+		});
+	};
+
+}]);
+

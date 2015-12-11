@@ -1,3 +1,5 @@
+DROP TABLES valor, campo, reg_pag, registo, pagina, tipo_registo, login, sequencia, utilizador;
+
 CREATE TABLE IF NOT EXISTS utilizador (
     userid INT NOT NULL AUTO_INCREMENT,
     email VARCHAR(255) NOT NULL,

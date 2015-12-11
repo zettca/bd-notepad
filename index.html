@@ -12,66 +12,57 @@
 	<script src="res/scripts.js"></script>
 </head>
 <body>
+	<div id="login" ng-controller="loginCtrl" ng-init="login()" style="margin: 10px">
+		<form ng-submit="login()" onsubmit="reset()" ng-hide="log.isLoggedUser">
+			<input type="text" ng-model="bdusername" name="bdusername" placeholder="Username" size="8">
+			<input type="text" ng-model="bdpassword" name="bdpassword" placeholder="Password" size="8">
+			<input type="text" ng-model="bdid" name="bdid" placeholder="ID" size="2">
+			<input type="submit" value="Login">
+		</form>
+		<span>{{log.loggedStatus}}</span>
+	</div>
 	<main>
-		<div id="login" ng-controller="loginCtrl">
-			<form ng-submit="login()" onsubmit="reset()" ng-hide="log.isLoggedUser">
-				<input type="text" ng-model="bdusername" name="bdusername" placeholder="Username" size="8">
-				<input type="text" ng-model="bdpassword" name="bdpassword" placeholder="Password" size="8">
-				<input type="text" ng-model="bdid" name="bdid" placeholder="ID" size="2">
-				<input type="submit" value="Login">
-			</form>
-			<span>{{log.loggedStatus}}</span>
-		</div>
-		
-		<h3>Páginas</h3>
 		<section id="pages" ng-controller="pagesCtrl">
+			<h3>Páginas</h3>
 			<select ng-model="selectedPage" ng-change="loadRecords()">
 				<option ng-repeat="page in pages" ng-value="page.pagecounter">{{page.nome}}</li>
 			</select>
-			<input ng-hide="pages == null"type="button" value="&#9998;">
-			<input ng-hide="pages == null"type="button" value="&#10008;">
-			<form ng-submit="add()" ng-controller="pagesFormCtrl">
+			<input ng-hide="pages == null" type="button" ng-click="del(selectedPage)" value="&#10008;">
+			<form ng-submit="add()" ng-controller="addPagesFormCtrl">
 				<input type="text" ng-model="bdpage" placeholder="Nova página" size="8">
 				<input type="submit" value="+">
 			</form>
 			<ul>
 				<li ng-repeat="record in records">{{record.nome}}</li>
-				<li ng-hide="records == null">(form for another)</li>
+				<li ng-hide="records == null">
+					<form ng-submit="add(selectedPage)" ng-controller="addRecordsPageFormCtrl">
+						<input type="text" ng-model="bdrecord" placeholder="Novo registo"size="8">
+						<input type="submit" value="+">
+					</form>
+				</li>
 			</ul>
 		</section>
 
-		<h3>Tipos de Registo</h3>
 		<section id="types" ng-controller="typesCtrl">
+			<h3>Tipos de Registo</h3>
 			<select ng-model="selectedType" ng-change="loadFields()">
 				<option ng-repeat="type in types" ng-value="type.typecnt">{{type.nome}}</li>
 			</select>
-			<input ng-hide="types == null"type="button" value="&#9998;">
-			<input ng-hide="types == null"type="button" value="&#10008;">
-			<form ng-submit="add()" ng-controller="typesFormCtrl">
+			<input ng-hide="types == null" type="button" ng-click="del(selectedType)"value="&#10008;">
+			<form ng-submit="add()" ng-controller="addTypesFormCtrl">
 				<input type="text" ng-model="bdtype" placeholder="Novo tipo"size="8">
 				<input type="submit" value="+">
 			</form>
 			<ul>
 				<li ng-repeat="field in fields">{{field.nome}}</li>
-				<li ng-hide="fields == null">(form for another)</li>
+				<li ng-hide="fields == null">
+					<form ng-submit="add(selectedType)" ng-controller="addFieldsTypeFormCtrl">
+						<input type="text" ng-model="bdfield" placeholder="Novo campo"size="8">
+						<input type="submit" value="+">
+					</form>
+				</li>
 			</ul>
 		</section>
-		
-		<!---
-		<h3>Registos do utilizador</h3>
-		<section id="records" ng-controller="recordCtrl">
-			<select>
-				<option ng-show="records == null" value="0">Select Record</option>
-				<option ng-repeat="record in records" value="record.regcounter">{{record.nome}}</li>
-			</select>
-			<input ng-hide="records == null"type="button" value="&#9998;">
-			<input ng-hide="records == null"type="button" value="&#10008;">
-			<form ng-submit="add()" ng-controller="recordsFormCtrl">
-				<input type="text" ng-model="bdrecord" placeholder="Novo registo"size="6">
-				<input type="submit" value="+">
-			</form>
-		</section>
-		--->
 	</main>
 </body>
 </html>

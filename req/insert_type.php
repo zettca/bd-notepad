@@ -18,11 +18,15 @@ try{
 	
 	if (!($uid && $name)) die();
 
-	$query = "INSERT INTO tipo_registo (userid, nome, ativo) VALUES ($uid, $name, 1)";
-
+	$query = "INSERT INTO sequencia (contador_sequencia, moment, userid) VALUES ((SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso)+1, NOW(), '$uid')";
 	$stmt = $con->prepare($query);
 	$stmt->execute();
-	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	
+    $query = "INSERT INTO tipo_registo (userid, typecnt, nome, idseq, ativo, ptypecnt) VALUES ('$uid', (SELECT * FROM (SELECT MAX(typecnt) FROM tipo_registo) AS coiso)+1, '$name', (SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso), 1, NULL )";
+	$stmt = $con->prepare($query);
+	$stmt->execute();
+
+	$result = array(success => true, uid => $uid, name => $name);
 
 	echo json_encode($result);
 	

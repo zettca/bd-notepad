@@ -44,5 +44,5 @@ FROM login;
 /* Alinea b */
 SELECT categoria, mes, ano, COUNT(sucesso) / COUNT(DISTINCT userid)
 FROM tentativas NATURAL JOIN d_utilizador NATURAL JOIN d_tempo
-WHERE pais = 'Macau'
+WHERE pais = 'Portugal'
 GROUP BY categoria, ano, mes WITH ROLLUP
