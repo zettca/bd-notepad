@@ -17,7 +17,7 @@ try{
 	
 	if (!$uid) die();
 
-	$query = "SELECT * FROM pagina WHERE ativa=1 AND pagina.userid=$uid";
+	$query = "SELECT * FROM pagina WHERE ativa=1 AND userid=$uid";
 
 	$stmt = $con->prepare($query);
 	$stmt->execute();

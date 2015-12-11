@@ -39,7 +39,7 @@ notepadApp.controller("pagesCtrl", ["$rootScope", "$scope", "$http", "logServ", 
 	
 	function loadPages(){
 		var user = logServ.loggedUser;
-		console.log("Updating Pages for " + user.nome);
+		console.log("Loading Pages for " + user.nome);
 		$http.get("req/select_pages.php", {params: {uid: user.userid}}).success(function(data){
 			console.log("Found " + data.pages.length + " Pages...");
 			$scope.pages = (data.success && data.pages.length > 0) ? data.pages : [];
@@ -48,17 +48,18 @@ notepadApp.controller("pagesCtrl", ["$rootScope", "$scope", "$http", "logServ", 
 	
 	$scope.loadRecords = function(){
 		var pid = $scope.selectedPage;
-		console.log("Updating Records for pageid=" + pid);
+		console.log("Loading Records for pageid=" + pid);
 		$http.get("req/select_page_records.php", {params: {pid: pid}}).success(function(data){
-			console.log("Found " + data.records.length + " tecords...");
+			console.log("Found " + data.records.length + " records...");
 			$scope.records = (data.success && data.records.length > 0) ? data.records : [];
 		});
 	};
 	
-	$scope.del = function(pageID){
-		console.log("Deleting " + pageID);
-		$http.get("req/select_type_fields.php", {params: {uid: logServ.loggedUser.userid, pid: pageID}}).success(function(data){
+	$scope.delPage = function(pageID){
+		console.log("Deleting page " + pageID);
+		$http.get("req/delete_page.php", {params: {uid: logServ.loggedUser.userid, pid: pageID}}).success(function(data){
 			console.log(data);
+			loadPages();
 		});
 	};
 	
@@ -72,26 +73,37 @@ notepadApp.controller("typesCtrl", ["$rootScope", "$scope", "$http", "logServ", 
 
 	function loadTypes(){
 		var user = logServ.loggedUser;
-		console.log("Updating Types for " + user.nome);
-		$http.get("req/hack.php", {params: {query: "SELECT * FROM tipo_registo WHERE userid="+user.userid}}).success(function(data){
-			console.log("Found " + data.length + " types...");
-			$scope.types = (data.length > 0) ? data : [];
+		console.log("Loading Types for " + user.nome);
+		$http.get("req/select_types.php", {params: {uid: user.userid }}).success(function(data){
+			console.log("Found " + data.types.length + " types...");
+			$scope.types = (data.types.length > 0) ? data.types : [];
 		});
 	}
 	
 	$scope.loadFields = function(){
 		var tid = $scope.selectedType;
-		console.log("Updating Fields for type=" + tid);
+		console.log("Loading Fields for type=" + tid);
 		$http.get("req/select_type_fields.php", {params: {tid: tid}}).success(function(data){
 			console.log("Found " + data.fields.length + " fields...");
 			$scope.fields = (data.success && data.fields.length > 0) ? data.fields : [];
 		});
 	};
 	
-	$scope.del = function(typeID){
-		console.log("Deleting " + typeID);
-		$http.get("req/select_type_fields.php", {params: {uid: logServ.loggedUser.userid, tid: typeID}}).success(function(data){
+	$scope.delType = function(typeID){
+		console.log("Deleting type " + typeID);
+		$http.get("req/delete_type.php", {params: {uid: logServ.loggedUser.userid, tid: typeID}}).success(function(data){
 			console.log(data);
+			loadTypes();
+			$scope.loadFields();
+		});
+	};
+	
+	$scope.delField = function(fieldID){
+		console.log("Deleting field " + fieldID);
+		$http.get("req/delete_type_field.php", {params: {uid: logServ.loggedUser.userid, cid: fieldID}}).success(function(data){
+			console.log(data);
+			loadTypes();
+			$scope.loadFields();
 		});
 	};
 	
@@ -144,7 +156,6 @@ notepadApp.controller("addPagesFormCtrl", ["$rootScope", "$scope", "$http", "log
 		var par = { uid: logServ.loggedUser.userid, name: $scope.bdpage };
 		console.log(par);
 		$http.get("req/insert_page.php", { params: par }).success(function(data){
-			console.log(data);
 			$rootScope.$emit('bdUpdate');
 			$scope.bdpage = "";
 		});
@@ -156,9 +167,9 @@ notepadApp.controller("addRecordsPageFormCtrl", ["$rootScope", "$scope", "$http"
 
 	$scope.add = function(){
 		console.log("Adding new page Record!");
-		var par = { pid: $scope.selectedPage, name: $scope.bdrecord };
-		$http.get("req/insert_type_fields.php", { params: par }).success(function(data){
-			console.log(data);
+		var par = { uid: logServ.loggedUser.userid, pid: $scope.selectedPage, tid: 0, name: $scope.bdrecord };
+		console.log(par);
+		$http.get("req/insert_page_record.php", { params: par }).success(function(data){
 			$rootScope.$emit('bdUpdate');
 			$scope.bdrecord = "";
 		});
@@ -167,15 +178,13 @@ notepadApp.controller("addRecordsPageFormCtrl", ["$rootScope", "$scope", "$http"
 }]);
 
 
-
-
 notepadApp.controller("addTypesFormCtrl", ["$rootScope", "$scope", "$http", "logServ",  function($rootScope, $scope, $http, logServ){
 
 	$scope.add = function(){
 		console.log("Adding new Type!");
 		var par = { uid: logServ.loggedUser.userid, name: $scope.bdtype };
+		console.log(par);
 		$http.get("req/insert_type.php", { params: par }).success(function(data){
-			console.log(data);
 			$rootScope.$emit('bdUpdate');
 			$scope.bdtype = "";
 		});
@@ -187,9 +196,9 @@ notepadApp.controller("addFieldsTypeFormCtrl", ["$rootScope", "$scope", "$http",
 
 	$scope.add = function(tid){
 		console.log("Adding new type Field!");
-		var par = { tid: $scope.selectedType, name: $scope.bdfield };
-		$http.get("req/insert_type_fields.php", { params: par }).success(function(data){
-			console.log(data);
+		var par = { uid: logServ.loggedUser.userid, tid: $scope.selectedType, name: $scope.bdfield };
+		console.log(par);
+		$http.get("req/insert_type_field.php", { params: par }).success(function(data){
 			$rootScope.$emit('bdUpdate');
 			$scope.bdfield = "";
 		});

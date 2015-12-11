@@ -12,8 +12,8 @@ header, main, footer{
 }
 
 section{
-	margin: 60px;
-	display: inline-block;
+	margin: 80px 60px;
+	display: block;
 }
 
 form, select{

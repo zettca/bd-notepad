@@ -27,7 +27,7 @@
 			<select ng-model="selectedPage" ng-change="loadRecords()">
 				<option ng-repeat="page in pages" ng-value="page.pagecounter">{{page.nome}}</li>
 			</select>
-			<input ng-hide="pages == null" type="button" ng-click="del(selectedPage)" value="&#10008;">
+			<input ng-hide="pages == null" type="button" ng-click="delPage(selectedPage)" value="X">
 			<form ng-submit="add()" ng-controller="addPagesFormCtrl">
 				<input type="text" ng-model="bdpage" placeholder="Nova página" size="8">
 				<input type="submit" value="+">
@@ -48,13 +48,16 @@
 			<select ng-model="selectedType" ng-change="loadFields()">
 				<option ng-repeat="type in types" ng-value="type.typecnt">{{type.nome}}</li>
 			</select>
-			<input ng-hide="types == null" type="button" ng-click="del(selectedType)"value="&#10008;">
+			<input ng-hide="types == null" type="button" ng-click="delType(selectedType)"value="X">
 			<form ng-submit="add()" ng-controller="addTypesFormCtrl">
 				<input type="text" ng-model="bdtype" placeholder="Novo tipo"size="8">
 				<input type="submit" value="+">
 			</form>
 			<ul>
-				<li ng-repeat="field in fields">{{field.nome}}</li>
+				<li ng-repeat="field in fields">
+					<span>{{field.nome}}</span>
+					<input type="button" ng-click="delField(field.campocnt)" value="X">
+				</li>
 				<li ng-hide="fields == null">
 					<form ng-submit="add(selectedType)" ng-controller="addFieldsTypeFormCtrl">
 						<input type="text" ng-model="bdfield" placeholder="Novo campo"size="8">
