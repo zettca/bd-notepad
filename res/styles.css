@@ -14,3 +14,16 @@ header, footer{
 main{
 	padding: 20px;
 }
+
+form, select{
+	display: inline-block;
+}
+
+p{
+	margin: 2px 0;
+}
+
+textarea{
+	border: transparent;
+	background: transparent;
+}

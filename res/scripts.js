@@ -1,115 +1,142 @@
 var notepadApp = angular.module("notepadApp", []);
 
-var BD = {
-	"accounts": {"Bruno":"123","Poods":"dicks","Metal":"soufixe"},
-	"paginas": ["Técnico", "Férias", "Aniversários", "Poker", "Dívidas"],
-	"tipos": ["Amigo", "Aniversário", "Morada", "Empréstimo"],
-};
-
-var USER = null;	// shameless. must change dis
-
-
-notepadApp.service("log", function(){
-	this.isLogged = false;
+notepadApp.service("logServ", ["$rootScope", function($rootScope){
+	this.isUserLogged = false;
 	this.loggedUser = null;
 	this.loggedStatus = "You are not logged in!";
 	
 	this.login = function(user){
-		this.isLogged = true;
-		this.loggedUser = user.nome;
-		this.loggedStatus = "Logged in as " + this.loggedUser + "...";
+		this.isUserLogged = true;
+		this.loggedUser = user;
+		this.loggedStatus = "Logged in as " + this.loggedUser.nome;
+		$rootScope.$emit('userLogEvent');
+		console.log(this.loggedStatus);
+	};
+	
+	this.logout = function(){
+		this.isUserLogged = false;
+		this.loggedUser = null;
+		this.loggedStatus = "Logged out sucessfully.";
+		$rootScope.$emit('userLogEvent');
+		console.log(this.loggedStatus);
 	};
 	
 	this.fail = function(){
-		this.isLogged = false;
+		this.isUserLogged = false;
 		this.loggedUser = null;
 		this.loggedStatus = "Login failed!";
+		$rootScope.$emit('userLogEvent');
+		console.log(this.loggedStatus);
 	};
 	
-	this.getLogStatus = function(){
-		return this.loggedStatus;
+}]);
+
+
+notepadApp.controller("pagesCtrl", ["$rootScope", "$scope", "$http", "logServ", function($rootScope, $scope, $http, logServ){
+	if (logServ.isUserLogged) loadPages();	// only if session stuff?
+	$rootScope.$on('userLogEvent', loadPages);
+	
+	function loadPages(){
+		var user = logServ.loggedUser;
+		console.log("Updating Pages for " + user.nome);
+		$http.get("req/select_pages.php", {params: {uid: user.userid}}).success(function(data){
+			console.log("Found " + data.pages.length + " Pages...");
+			$scope.pages = (data.success && data.pages.length > 0) ? data.pages : [];
+		});
+	}
+	
+	$scope.loadRecords = function(){
+		var pid = $scope.selectedPage;
+		console.log("Updating Records for pageid=" + pid);
+		$http.get("req/select_page_records.php", {params: {pid: pid}}).success(function(data){
+			console.log("Found " + data.records.length + " tecords...");
+			$scope.records = (data.success && data.records.length > 0) ? data.records : [];
+		});
 	};
 	
-});
+}]);
 
 
-notepadApp.controller("loginCtrl", ["$scope", "$http", "log", function($scope, $http, log){
-	$scope.loggedStatus = log.loggedStatus;
+notepadApp.controller("typesCtrl", ["$rootScope", "$scope", "$http", "logServ", function($rootScope, $scope, $http, logServ){
+	if (logServ.isUserLogged) loadTypes();	// only if session stuff?
+	$rootScope.$on('userLogEvent', loadTypes);
+
+	function loadTypes(){
+		var user = logServ.loggedUser;
+		console.log("Updating Types for " + user.nome);
+		$http.get("req/hack.php", {params: {query: "SELECT * FROM tipo_registo WHERE userid="+user.userid}}).success(function(data){
+			console.log("Found " + data.length + " types...");
+			$scope.types = (data.length > 0) ? data : [];
+		});
+	}
+	
+	$scope.loadFields = function(){
+		var tid = $scope.selectedType;
+		console.log("Updating Fields for pageid=" + tid);
+		$http.get("req/select_type_fields.php", {params: {tid: tid}}).success(function(data){
+			console.log("Found " + data.fields.length + " fields...");
+			$scope.fields = (data.success && data.fields.length > 0) ? data.fields : [];
+		});
+	};
+	
+}]);
+
+/*notepadApp.controller("recordCtrl", ["$rootScope", "$scope", "$http", "logServ", function($rootScope, $scope, $http, logServ){
+	if (logServ.isUserLogged) loadRecords();	// only if session stuff?
+	$rootScope.$on('userLogEvent', function(){ loadRecords(); });
+	
+	function loadRecords(user){
+		user = logServ.loggedUser;
+		console.log("Updating Records for " + user.nome);
+		$http.get("req/hack.php", {params: {query: "SELECT * FROM tipo_registo WHERE userid="+user.userid}}).success(function(data){
+			console.log("Found " + data.length + " Records...");
+			$scope.records = (data.length > 0) ? data : [];
+		});
+	}
+	
+}]);*/
+
+
+
+
+
+/* FORMS STUFF */
+
+notepadApp.controller("loginCtrl", ["$scope", "$http", "logServ", function($scope, $http, logServ){
+	$scope.log = logServ;
 	
 	$scope.login = function(){
-		var user = $scope.bdusername;
-		var pass = $scope.bdpassword;
-		
-		$http.get("req/login.php", {params: {user: user, pass: pass}}).success(function(data){
-			console.log(data[0]);
-			if (data.length > 0){
-				log.login(data[0]);
+		var prams = {};
+		if ($scope.id)
+			prams = {user: $scope.bdusername, pass: $scope.bdpassword, id: $scope.bdid};
+		else
+			prams = {user: $scope.bdusername, pass: $scope.bdpassword, id: $scope.bdid};
+		console.log(prams);
+		$http.get("req/login.php", {params: prams}).success(function(data){
+			console.log(data);
+			if (data.success){
+				logServ.login(data.user);
 			} else{
-				log.fail();
+				logServ.fail();
 			}
-			$scope.loggedStatus = log.getLogStatus();
 		});
 	};
-
+	
+	$scope.logout = function(){
+		logServ.logout();	
+	};
 	
 }]);
-
-notepadApp.controller("pagesCtrl", ["$scope", "$http", "log", function($scope, $http, log){
-	$scope.pages = BD["paginas"];
-	//$scope.userID = log.loggedUser.userid;
-	
-	//if ($scope.userID){
-		$http.get("req/hack.php", {params: {query: "SELECT * FROM pagina WHERE userid=43"}}).success(function(data){
-			console.log(data);
-			if (data.length > 0){
-				$scope.pages = data;
-			} else{
-				$scope.pages = BD["paginas"];
-			}
-		});
-	//}
-	
-}]);
-
-
-notepadApp.controller("typesCtrl", ["$scope", "$http", "log", function($scope, $http, log){
-	$scope.types = BD["tipos"];
-	
-	//if (log.isLogged){
-		$http.get("req/hack.php", {params: {query: "SELECT * FROM tipo_registo WHERE userid=43"}}).success(function(data){
-			console.log(data);
-			if (data.length > 0){
-				$scope.types = data;
-			} else{
-				$scope.types = BD["tipos"];
-			}
-		});
-	//}
-}]);
-
-notepadApp.controller("recordCtrl", ["$scope", "$http", "log", function($scope, $http, log){
-	$scope.records = [];
-	
-	//if (log.isLogged){
-		$http.get("req/hack.php", {params: {query: "SELECT * FROM ist178013.tipo_registo WHERE userid=43 AND ativo=1"}}).success(function(data){
-			console.log(data);
-			if (data.length > 0){
-				$scope.records = data;
-			} else{
-				$scope.records = [];
-			}
-		});
-	//}
-}]);
-
-
-
 
 notepadApp.controller("pagesFormCtrl", function($scope){
-	$scope.pages = BD["paginas"];
+	$scope.pages = [];
 
 	$scope.add = function(){
-		$scope.pages.push($scope.bdpage);
+		if ($scope.bdpage){
+			$scope.pages.push($scope.bdpage);
+			console.log($scope.pages);
+			$scope.bdpage = "";
+		}
 	};
 
 	$scope.del = function(){
@@ -118,13 +145,33 @@ notepadApp.controller("pagesFormCtrl", function($scope){
 });
 
 notepadApp.controller("typesFormCtrl", function($scope){
-	$scope.types = BD["tipos"];
+	$scope.types = [];
 
 	$scope.add = function(){
-		$scope.types.push($scope.bdtype);
+		if ($scope.bdtype){
+			$scope.types.push($scope.bdtype);
+			console.log($scope.types);
+			$scope.bdtype = "";
+		}
 	};
 
 	$scope.del = function(){
 		$scope.types.splice($scope.bdtype, 1);
+	};
+});
+
+notepadApp.controller("recordsFormCtrl", function($scope){
+	$scope.records = [];
+
+	$scope.add = function(){
+		if ($scope.bdrecord){
+			$scope.records.push($scope.bdrecord);
+			console.log($scope.records);
+			$scope.bdrecord = "";
+		}
+	};
+
+	$scope.del = function(){
+		$scope.records.splice($scope.bdrecord, 1);
 	};
 });
