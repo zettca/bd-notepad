@@ -14,7 +14,6 @@ try{
 	$con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	$query = $_REQUEST['query'];
-	
 	$stmt = $con->prepare($query);
 	$stmt->execute();
 	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
