@@ -17,14 +17,19 @@ try{
 	$tid = $_REQUEST['tid'];
 	$name = $_REQUEST['name'];
 	
+	
 	if (!($uid && $tid && $name)) die();
-
-	$query = "INSERT INTO campo (userid, typecnt, nome, ativo) VALUES ($uid, $tid, $name, 1)";
-
+	
+	$query = "INSERT INTO sequencia (contador_sequencia, moment, userid) VALUES ((SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso)+1, NOW(), '$uid')";
 	$stmt = $con->prepare($query);
 	$stmt->execute();
-	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	
+    $query = "INSERT INTO campo (userid, typecnt, campocnt, nome, idseq, ativo, pcampocnt) VALUES ( '$uid', '$tid', (SELECT * FROM (SELECT MAX(campocnt) FROM campo) AS coiso)+1, '$name', (SELECT * FROM (SELECT MAX(contador_sequencia) FROM sequencia) AS coiso), 1, NULL)";
+	$stmt = $con->prepare($query);
+	$stmt->execute();
 
+	$result = array(success => true, uid => $uid, name => $name);
+	
 	echo json_encode($result);
 	
 	$con = null;
